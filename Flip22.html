@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flip - Flora</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f3efe7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+	  overflow-x: hidden;
+    }
+    .card {
+      width: min(92vw, 480px);
+      aspect-ratio: 4 / 3;
+	  height: auto;
+	  border-radius: 15px;
+      overflow: hidden;
+      margin: 20px auto;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      perspective: 1000px;
+      cursor: pointer;
+	  position: relative;
+    }
+	#nextButton {
+    background-color: #2e452f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+	}
+
+	#nextButton:hover {
+    background-color: #4b6a4c;
+	}
+	
+	button {
+    font-family: 'Quicksand', sans-serif;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px; /* Standardstørrelse, kan tilpasses */
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+
+
+#resetButton {
+    background-color: #d15050; /* En rødlig farve for "Nulstil" */
+}
+
+#resetButton:hover {
+    background-color: #e56565;
+}
+
+
+#toggleListButton:hover, #toggleHabitatsButton:hover {
+    background-color: #4b6a4c; /* Samme mørkere grøn som Næste-knappen */
+}
+
+/* Bevar den gamle stil for Sort-knappen (uændret) */
+#sortButton:hover { 
+    background-color: #929292;
+}
+
+#sidebarList button#sortButton {
+    background-color: #929292; /* En anden grå for et mere subtilt look */
+    padding: 5px 10px;
+    font-size: 12px;
+    margin-bottom: 10px;
+    position: static; /* Giver den en normal placering i sidepanelet */
+}
+
+#sidebarList button#sortButton:hover {
+    background-color: #7a7a7a;
+}
+
+#toggleListButton {
+    background-color: #2e452f;
+	top: 10px;
+    right: 10px;
+    margin: 0px; 
+    position: fixed;
+    z-index: 1001;
+}
+
+#sidebarHeader {
+    position: sticky;       
+    top: 0;                
+    background: #ffffffd9;  
+    z-index: 999;
+	width: 100%;
+	padding: 0px;
+    display: flex;          
+    justify-content: space-between; 
+    align-items: center;    
+	line-height: 1.5em;
+	box-sizing: border-box;	
+}
+
+#speciesList {
+    margin: 0;
+    padding: 0;
+}
+
+#toggleHabitatsButton {
+	background-color: #2e452f;
+    top: 0;
+    left: 0;
+    margin: 10px; /* Giver 10px luft til top og venstre kant */
+    position: fixed;
+    z-index: 1001;
+}
+ 
+   .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+    }
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      background: lightblue;
+    }
+    .card-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+	  display: block;
+    }
+@media (min-width: 769px) {
+  .card {
+    width: 400px;
+    height: 300px;
+    aspect-ratio: auto;   /* slå automatisk højde fra på desktop */
+  }
+}
+    .card-back {
+      transform: rotateY(180deg);
+      padding: 20px;
+      height: 100%;
+      background: #dce8d0;
+      box-sizing: border-box;
+    }
+	
+    h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+	.card-back h2 i {
+        display: block; /* Sørg for at den starter på en ny linje */
+        font-size: 80%; /* 80% TEKSTSTØRRELSE */
+        color: rgba(46, 69, 47, 0.7); /* Lidt lysere/transparent version af #2e452f */
+        margin-top: 5px;
+    }
+    h3 {
+      margin: 10px 0 5px 0;
+      font-size: 18px;
+      color: #2e452f;
+      font-style: italic;
+    }
+    .naturtype {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .no-naturtype {
+      margin-top: 15px;
+      height: 1px;
+      background: lightgray;
+      width: 100%;
+    }
+	a.filter-link {
+	  text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 14px;
+      color: white;
+      display: inline-block;
+  }
+
+	a.indikator {
+      background-color: #3E7C3E;
+  }
+
+	a.typisk {
+      background-color: #9e774c;
+  }
+
+	a.filter-link:visited,
+	a.filter-link:active,
+	a.filter-link:hover {
+      text-decoration: none;
+      color: white;
+  }
+
+	#activeFilter {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 10px;
+     margin-bottom: 10px;
+     justify-content: center;
+}
+
+	.filter-tag {
+	  background-color: #2e452f;
+	  color: white;
+	  padding: 5px 10px;
+	  border-radius: 15px;
+	  font-size: 14px;
+	  display: flex;
+	  align-items: center;
+	  gap: 5px;
+}
+
+	.filter-tag .remove-filter {
+	  cursor: pointer;
+	  font-weight: bold;
+	  margin-left: 5px;
+}
+	a.familie-link {
+		color: inherit !important;
+		text-decoration: none !important;
+		font-style: normal !important;
+		cursor: pointer !important;
+}
+	a.familie-link:hover {
+		text-decoration: underline !important;
+}
+	a.familie-link i {
+		font-style: italic !important;
+		color: inherit !important;
+}
+	.species-item {
+		margin-bottom: 2px; /* Mere plads MELLEM arterne */
+		line-height: 1.2; /* Mindre plads mellem dansk og latinsk navn */
+}
+    .species-item a {
+		position: relative;
+		display: inline-block;
+		text-decoration: none;
+		transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* === UNDERSTREGNING PÅ ARTSLISTE (kun dansk navn) === */
+.species-item.current-plant .danish-name {
+  position: relative;
+  font-weight: 550; /* symbolsk fed – uden hop */
+}
+
+.species-item.current-plant .danish-name::after {
+  content: "";
+  position: absolute;
+  left: 3%; /* gør linjen lidt kortere i begge ender */
+  bottom: 0;
+  width: 94%; /* lidt kortere end teksten, mere casual */
+  height: 1.5px; /* blød linje */
+  background-color: currentColor;
+  border-radius: 2px;
+}
+
+/* === LATIN NAVN – kursiv, mindre og med indryk === */
+.species-item .latin-name {
+  display: block;
+  font-style: italic;
+  font-size: 0.9em;
+  margin-left: 0.8em; /* indryk giver naturlig opdeling */
+  margin-top: 0;
+  line-height: 1.2;
+}
+.species-item.current-plant .latin-name {
+    font-weight: 550; /* symbolsk fed for Latin-navn */
+}
+
+/* Tving naturtype-links til én linje altid */
+.habitat-item a {
+  white-space: nowrap !important;  /* Ingen linjeskift */
+  overflow: hidden;
+  text-overflow: ellipsis;         /* Tilføj ... hvis teksten er for lang */
+  font-weight: normal;             /* Normal indtil markeret */
+  text-decoration: none;           /* Normal indtil markeret */
+}
+.unique-star {
+    color: gold; /* Eller en anden nuance af gul */
+    font-size: 0.9em; /* Lidt mindre end teksten for diskretion */
+    margin-left: 3px; /* Lidt luft til teksten */
+    /* Du kan justere font-weight, hvis du vil have den tykkere */
+    font-weight: bold;
+}
+/* === UNDERSTREGNING PÅ NATURTYPELISTE === */
+.habitat-item.current-habitat a {
+  position: relative;
+  white-space: nowrap;       /* Tving teksten på én linje */
+  overflow: hidden;          /* Skjul alt der går ud over */
+  text-overflow: ellipsis;
+  font-weight: 550; 
+}
+
+.habitat-item.current-habitat a::after {
+  content: "";
+  position: absolute;
+  left: 5%; 
+  bottom: 0;
+  width: 3.5ch;
+  height: 1.5px;
+  background-color: currentColor;
+  border-radius: 2px;
+}
+
+  </style>
+</head>
+<body>
+<button id="toggleHabitatsButton">
+  Naturtyper
+</button>
+<div id="habitatSidebar" style="position: fixed; left: 10px; top: 60px; z-index: 1001; width: 250px; background: #ffffffd9; border: 1px solid #ccc; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: none; max-height: 80vh; overflow-y: auto; font-size: 14px;">
+  <strong>Naturtyper:</strong>
+  <ul id="habitatList" style="list-style: none; padding: 0; margin-top: 10px;"></ul>
+</div>
+
+ <button id="resetButton" style="margin-top: 20px; display: none;">Nulstil filter</button>
+  <div id="activeFilter" style="margin-top: 10px; display: none;"></div>
+  <div id="cardsContainer"></div>
+    <button id="nextButton" style="margin-top: 20px;">Næste</button>
+
+<button id="toggleListButton">
+  Arter
+</button>
+
+<div id="sidebarList" style="position: fixed; right: 10px; margin-top: 60px; z-index: 1001; width: 250px; background: #ffffffd9; border: 1px solid #ccc; padding: 0 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: none; max-height: 80vh; overflow-y: auto; font-size: 14px;">
+<div id="sidebarHeader">
+    <button id="sortButton">DK/LAT</button>
+    <span id="speciesCount">Arter: <strong>0</strong></span>
+</div>
+  <ul id="speciesList" style="list-style: none; padding: 0; margin: 0;"></ul>
+</div>
+  <script defer>
+    const githubBase = 'https://raw.githubusercontent.com/Slothophant/Plantefanden/main/';
+	const habitatData = {
+		// Anden kystvegetation
+		'1210': { name: 'Strandvold med enårige planter', color: '#6A9BC3' },
+		'1220': { name: 'Strandvold med flerårige planter', color: '#6A9BC3'},
+		'1230': { name: 'Klinter/klipper ved kysten', color: '#6A9BC3'},
+		//Strandeng
+		'1310': { name: 'Enårig strandengsvegetation', color: '#73A8D3' },
+		'1320': { name: 'Vadegræssamfund', color: '#73A8D3' },
+		'1330': { name: 'Strandeng', color: '#73A8D3' },
+		'1340': { name: 'Indlands-saltenge', color: '#73A8D3'},
+		// Kystklitter
+		'2110': { name: 'Forklit', color: '#4A769C' }, 
+		'2120': { name: 'Hvid klit', color: '#4A769C' }, 
+		'2130': { name: 'Grå/grønsværklit', color: '#4A769C' },
+		'2140': { name: 'Klithede', color: '#4A769C' },
+		'2190': { name: 'Klitlavning', color: '#4A769C' },
+		// Hede
+		'4010': { name: 'Våd Hede', color: '#E3A857' },
+		'4030': { name: 'Tør Hede', color: '#E3A857' },
+		//Græsland
+		'6120': { name: 'Tørtkalksandsoverdrev', color: '#FFDD60' },
+		'6210': { name: 'Kalkoverdrev', color: '#FFDD60' },
+		'6230': { name: 'Surt overdrev', color: '#FFDD60' },
+		// Ferske enge & moser
+		'6410': { name: 'Tidvis våd enge', color: '#D5B990' },
+		'7110': { name: 'Aktiv højmose', color: '#D5B990' },
+		'7120': { name: 'Nedbrudt højmose', color: '#D5B990' },
+		'7140': { name: 'Hængesæk', color: '#D5B990' },
+		'7150': { name: 'Tørvelavning', color: '#D5B990' },
+		'7220': { name: 'Kildevæld', color: '#D5B990' },
+		'7230': { name: 'Rigkær', color: '#D5B990' },
+		// Bøgeskove
+		'9110': { name: 'Bøg på mor uden kristtorn', color: '#91A88A' },
+		'9120': { name: 'Bøg på mor med kristtorn', color: '#91A88A' },
+		'9130': { name: 'Bøg på muld', color: '#91A88A' },
+		'9150': { name: 'Bøg på Kalkoverdrev', color: '#91A88A' },
+		//Egeskove
+		'9160': { name: 'Ege-blandskov', color: '#548757' },
+		'9170': { name: 'Stilkege-krat', color: '#548757' },
+		'9190': { name: 'Vinteregeskov', color: '#548757' },
+		//Vådbundsskove
+		'91D0': { name: 'Skovbevoksede tørvemose', color: '#2E452F' },
+		'91E0': { name: 'Elle- og askeskov', color: '#2E452F' },
+	};
+		
+    let plants = [];
+    let filteredPlants = [];
+    let currentIndex = 0;
+	
+	let currentPlantObject = null;
+	let activeFilterType = null;
+	let activeFilterValue = null;
+	let currentSortOrder = 'latin'; // Kan være 'latin' eller 'danish'
+
+    // Helper function - ensures input is always an array
+    function ensureArray(x) {
+      if (Array.isArray(x)) return x;
+      if (!x) return [];
+      return [x];
+    }
+
+    // Fetch data and initialize
+    fetch(githubBase + 'Flip_upd.json')
+      .then(response => response.json())
+      .then(data => {
+        plants = data;
+        shuffle(plants);
+        filteredPlants = plants.slice();
+        showOneRandomCard();
+      })
+      .catch(error => {
+        console.error('FEJL i fetch af JSON:', error);
+      });
+
+    // Shuffle array (Fisher-Yates)
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+	
+	document.getElementById('toggleHabitatsButton').addEventListener('click', () => {
+    const sidebar = document.getElementById('habitatSidebar');
+    const shouldShow = getComputedStyle(sidebar).display === 'none';
+    sidebar.style.display = shouldShow ? 'block' : 'none';
+    if (shouldShow) updateHabitatList();
+});
+
+function updateHabitatList() {
+    const list = document.getElementById('habitatList');
+    list.innerHTML = '';
+
+    const allHabitats = new Set();
+    plants.forEach(plant => {
+        ensureArray(plant.indikator).forEach(h => allHabitats.add(h));
+        ensureArray(plant.typisk).forEach(h => allHabitats.add(h));
+    });
+
+    const sortedHabitats = Array.from(allHabitats).sort();
+
+    sortedHabitats.forEach(habitatNr => {
+        const habitatInfo = habitatData[habitatNr] || { name: 'Ukendt', color: '#999' };
+        const listItem = document.createElement('li');
+        listItem.className = 'habitat-item';
+        
+        // Markér fed, hvis det er det aktive filter
+        if (activeFilterType && activeFilterValue === habitatNr) {
+            listItem.classList.add('current-habitat');
+        }
+        
+        listItem.innerHTML = `<a href="#" class="filter-link" style="color: ${habitatInfo.color}; text-decoration: none;" data-type="habitat" data-value="${habitatNr}">
+            ${habitatNr} - ${habitatInfo.name}
+        </a>`;
+        
+        list.appendChild(listItem);
+    });
+}
+
+    // Show one card given a plant object
+    function generateCard(plant) {
+      const container = document.getElementById('cardsContainer');
+      container.innerHTML = ''; // Clear old cards
+
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      // Use ensureArray to avoid .join errors here:
+      card.dataset.indikator = ensureArray(plant.indikator).join(',');
+      card.dataset.typisk = ensureArray(plant.typisk).join(',');
+
+      const inner = document.createElement('div');
+      inner.className = 'card-inner';
+
+      const front = document.createElement('div');
+      front.className = 'card-front';
+
+      const img = document.createElement('img');
+      img.src = githubBase + plant.billede;
+      img.alt = plant.art_dk;
+      img.onerror = () => console.error("Fejl ved indlæsning af billede:", img.src);
+
+      front.appendChild(img);
+
+      const back = document.createElement('div');
+      back.className = 'card-back';
+      back.innerHTML = `
+		<h2>${plant.art_dk} <br><i>${plant.art_lat}</i></h2>
+		<h3>
+			<a href="#" class="familie-link filter-link" data-type="familie" data-value="${plant.familie_dk}">
+			${plant.familie_dk} (<i>${plant.familie_lat}</i>)
+			</a>
+		</h3>  ${generateNaturtype(plant)}
+      `;
+
+      inner.appendChild(front);
+      inner.appendChild(back);
+      card.appendChild(inner);
+      container.appendChild(card);
+
+      card.addEventListener('click', (e) => {
+		// Hvis klik er på et filter-link, må kortet ikke flippe
+		if (e.target.closest('.filter-link')) return;
+		card.classList.toggle('flipped');
+});
+
+    }
+
+function isUniqueIndicator(plant, naturtypeNr) {
+  // Tjek om planten er indikator for naturtypeNr
+  // og om planten kun er indikator for denne ene naturtype i hele datasættet
+
+  // Plantens indikatorer
+  const indikatorer = ensureArray(plant.indikator);
+
+  // Hvis planten ikke har denne naturtype som indikator -> false
+  if (!indikatorer.includes(naturtypeNr)) return false;
+
+  // Hvis planten har mere end 1 indikator -> ikke unik
+  if (indikatorer.length > 1) return false;
+
+  // Ellers unik (indikator kun for denne naturtype)
+  return true;
+}
+
+function generateNaturtype(plant) {
+  const indikator = ensureArray(plant.indikator);
+  const typisk = ensureArray(plant.typisk);
+
+  if (indikator.length === 0 && typisk.length === 0) {
+    return `<div class="no-naturtype"></div>`;
+  }
+
+  let html = `<div class="naturtype">`;
+
+  indikator.forEach(nr => {
+    if (nr.trim()) {
+      // Tjek om denne plante kun er indikator for denne ene naturtype
+      const star = isUniqueIndicator(plant, nr) ? ' <span class="unique-star">★</span>' : '';
+      html += `<a href="#" class="indikator filter-link" data-type="indikator" data-value="${nr}">${nr}${star}</a>`;
+    }
+  });
+
+  typisk.forEach(nr => {
+    if (nr.trim()) {
+      // Ingen stjerne her for nu
+      html += `<a href="#" class="typisk filter-link" data-type="typisk" data-value="${nr}">${nr}</a>`;
+    }
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+
+
+
+    // Show one random card from filteredPlants
+    function showOneRandomCard() {
+		if (filteredPlants.length === 0) {
+		document.getElementById('cardsContainer').innerHTML = '<p>Ingen planter at vise.</p>';
+		document.getElementById('speciesList').innerHTML = '<li>Ingen arter fundet.</li>';
+		return;
+	}
+	currentIndex = Math.floor(Math.random() * filteredPlants.length);
+	currentPlantObject = filteredPlants[currentIndex]	
+	generateCard(currentPlantObject);
+	updateSidebarList();
+}
+
+    function showNextCard() {
+  if (filteredPlants.length === 0) {
+    document.getElementById('cardsContainer').innerHTML = '<p>Ingen planter at vise.</p>';
+    document.getElementById('speciesList').innerHTML = '<li>Ingen arter fundet.</li>';
+    return;
+  }
+  // VÆLG 100% tilfældigt kort (ingen fast rækkefølge)
+  currentIndex = Math.floor(Math.random() * filteredPlants.length);
+  currentPlantObject = filteredPlants[currentIndex];
+  generateCard(currentPlantObject);
+  updateSidebarList();
+}
+
+	// Funktion: Anvend et filter og opdater visningen
+function applyFilter(type, value) {
+    activeFilterType = type;
+    activeFilterValue = value;
+
+    filteredPlants = plants.filter(plant => {
+        const ind = ensureArray(plant.indikator);
+        const typ = ensureArray(plant.typisk);
+        const fam = plant.familie_dk || '';
+
+        // Tjek for habitat-type, både indikator og typisk
+        if (type === 'habitat') {
+            return ind.includes(value) || typ.includes(value);
+        } else if (type === 'familie') {
+            return fam === value;
+        }
+        // Eksisterende logik for klik på kortene
+        else if (type === 'indikator' || type === 'typisk') {
+            return ind.includes(value) || typ.includes(value);
+        }
+
+        return false; // Skulle ikke ske for andre typer
+    });
+
+    shuffle(filteredPlants);
+    showOneRandomCard();
+    updateSidebarList();
+    updateHabitatList(); // <-- Vigtigt: Opdater den nye liste her
+
+    document.getElementById('resetButton').style.display = 'inline-block';
+    const filterDiv = document.getElementById('activeFilter');
+    filterDiv.style.display = 'flex';
+
+    let latin = '';
+    if (activeFilterType === 'familie') {
+        const matchedPlant = plants.find(p => p.familie_dk === activeFilterValue);
+        if (matchedPlant) latin = ` (<i>${matchedPlant.familie_lat}</i>)`;
+    }
+
+    let displayType = activeFilterType;
+    let displayValue = activeFilterValue;
+
+    // Hvis filteret er en naturtype, vis også navnet på filter-tag'en
+    if (activeFilterType === 'habitat' || activeFilterType === 'indikator' || activeFilterType === 'typisk') {
+        displayType = 'Naturtype';
+        const habitatInfo = habitatData[activeFilterValue];
+        if (habitatInfo) {
+            displayValue = `${activeFilterValue} - ${habitatInfo.name}`;
+        }
+    }
+
+    filterDiv.innerHTML = `
+        <div class="filter-tag">${displayType}: ${displayValue}${latin}
+            <span class="remove-filter" title="Fjern filter">&times;</span>
+        </div>`;
+}
+
+    
+	function resetFilter() {
+		filteredPlants = plants.slice();
+		shuffle(filteredPlants);
+		showOneRandomCard();
+		activeFilterType = null;
+		activeFilterValue = null;
+		updateSidebarList();
+		updateHabitatList();
+
+		document.getElementById('resetButton').style.display = 'none';
+		document.getElementById('activeFilter').style.display = 'none';
+}
+
+
+    // Filter cards based on clicked indikator/typisk value
+      document.addEventListener('click', function(e) {
+    const link = e.target.closest('.filter-link');
+    if (link) {
+        e.preventDefault();
+        e.stopPropagation(); 
+		if (link.dataset.type === 'habitat') {
+          applyFilter('indikator', link.dataset.value); // Vi kan her vælge at filtrere på indikator for at være konsistent
+      } else {
+        applyFilter(link.dataset.type, link.dataset.value);
+	  }
+	}
+
+    if (e.target.classList.contains('remove-filter')) {
+        resetFilter();
+    }
+
+    if (e.target.id === 'resetButton') {
+        resetFilter();
+    }
+});
+	
+	// Skift sortering for listen
+	document.getElementById('sortButton').addEventListener('click', () => {
+    if (currentSortOrder === 'latin') {
+        currentSortOrder = 'danish';
+        document.getElementById('sortButton').textContent = 'Sorter: Dansk';
+    } else {
+        currentSortOrder = 'latin';
+        document.getElementById('sortButton').textContent = 'Sorter: Latin';
+    }
+    updateSidebarList(); // Opdater listen med den nye sortering
+});
+
+;
+
+    // Næste knap til at vise næste kort
+    document.getElementById('nextButton').addEventListener('click', () => {
+      showNextCard();
+    });
+
+  document.getElementById('toggleListButton').addEventListener('click', () => {
+	const sidebar = document.getElementById('sidebarList');
+	const shouldShow = getComputedStyle(sidebar).display === 'none';
+  sidebar.style.display = shouldShow ? 'block' : 'none';
+
+	if (shouldShow) updateSidebarList(); // tving opdatering hver gang det vises
+	});
+
+function updateSidebarList() {
+  const list = document.getElementById('speciesList');
+  list.innerHTML = '';
+
+  document.getElementById('speciesCount').innerHTML = `Arter <strong>${filteredPlants.length}</strong>`;
+
+
+  filteredPlants.sort((a, b) => a.art_lat.localeCompare(b.art_lat));
+	  if (currentSortOrder === 'latin') {
+		filteredPlants.sort((a, b) => a.art_lat.localeCompare(b.art_lat));
+	} else {
+		filteredPlants.sort((a, b) => a.art_dk.localeCompare(b.art_dk, 'da'));
+}
+
+  filteredPlants.forEach((plant, index) => {
+    const indikator = ensureArray(plant.indikator);
+    const typisk = ensureArray(plant.typisk);
+
+    // === NYT: farve og stjerne logik afhænger af aktivt filter ===
+    let color = '#333'; // Standard sort
+    let star = '';
+
+    if (activeFilterType === 'indikator' || activeFilterType === 'typisk') {
+            // Logik når filter er en SPECIFIK naturtype (indikator/typisk)
+            if (indikator.includes(activeFilterValue)) {
+                color = '#3E7C3E'; // Grøn hvis indikator for valgt type
+                if (indikator.length === 1) { // Stjerne hvis kun én indikator for denne type
+                    star = ' <span class="unique-star">★</span>';
+                }
+            } else if (typisk.includes(activeFilterValue)) {
+                color = '#9e774c'; // Brun hvis typisk for valgt type
+            } else {
+                color = '#999'; // Grå hvis ingen relation til den valgte naturtype
+            }
+        } else {
+            // Logik når filter er 'familie' ELLER intet filter (default view)
+            const isIndikator = indikator.length > 0;
+            const isTypisk = typisk.length > 0;
+
+            if (isIndikator && isTypisk) {
+                color = '#6699CC'; // lys, neutral blå: Både indikator OG typisk (generelt)
+            } else if (isIndikator) {
+                color = '#3E7C3E'; // Grøn: Kun indikator (generelt)
+                if (indikator.length === 1) { // Stjerne hvis kun ÉN indikator totalt set
+                    star = ' <span class="unique-star">★</span>';
+                }
+            } else if (isTypisk) {
+                color = '#9e774c'; // Brun: Kun typisk (generelt)
+            } else {
+                color = '#999'; // Grå: Ingen relation til naturtype
+            }
+        }
+
+        const item = document.createElement('li');
+        item.className = 'species-item';
+		if (currentPlantObject && plant.art_lat === currentPlantObject.art_lat) {
+		item.classList.add('current-plant');
+		}
+        item.innerHTML = `<a href="#" style="color: ${color}; text-decoration: none;">
+            <span class="danish-name">${plant.art_dk}${star}</span><br>
+            <span class="latin-name"><i>${plant.art_lat}</i></span>
+        </a>`;
+
+        item.querySelector('a').addEventListener('click', (e) => {
+            e.preventDefault();
+            const clickedPlant = filteredPlants[index];
+            generateCard(clickedPlant);
+			currentPlantObject = clickedPlant; // <-- Opdater her
+			updateSidebarList();
+        });
+
+        list.appendChild(item);
+    });
+}
+
+
+  </script>
+</body>
+</html>
